@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Function to display the menu
+show_menu() {
+    echo "Select an option:"
+    echo "1. Edit ~/.config/hyprland.conf"
+    echo "2. Reboot"
+    echo "3. Shutdown"
+    echo "4. Update System"
+}
+
+# Main loop
+while true; do
+    show_menu
+    read -p "Choose an option (1-4): " choice
+
+    case $choice in
+        1)
+            # Edit hyprland.conf
+            nano ~/.config/hyprland.conf
+            ;;
+        2)
+            # Reboot the system
+            echo "Rebooting..."
+            sudo reboot
+            break
+            ;;
+        3)
+            # Shutdown the system
+            echo "Shutting down..."
+            sudo shutdown now
+            break
+            ;;
+        4)
+            # Update the system
+            echo "Updating system..."
+            cd ~/yay && yay -Syyuu
+            ;;
+        *)
+            echo "Invalid option. Please try again."
+            ;;
+    esac
+done
+
