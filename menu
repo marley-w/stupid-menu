@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# Define colors
+PURPLE='\033[0;35m'
+WHITE='\033[1;37m'
+RESET='\033[0m'
+
+# Define the config files with full paths
+CONFIG_FILES=(
+    "$HOME/.config/hypr/hyprland.conf"
+    "$HOME/.config/hypr/hyprpaper.conf"
+    "$HOME/.config/MangoHud/MangoHud.conf"
+    "$HOME/.config/waybar/style.css"
+    "$HOME/.config/waybar/config"
+    "$HOME/.config/kitty/kitty.conf"
+    "$HOME/.config/fastfetch/config.jsonc"
+)
+
+# Function to display the main menu
+display_menu() {
+    echo -e "${PURPLE}=== Settings ===${RESET}"
+    echo -e "${WHITE}[1] ${PURPLE}Edit Configs${RESET}"
+    echo -e "${WHITE}[2] ${PURPLE}Change Wallpaper${RESET}"
+    echo -e "${WHITE}[3] ${PURPLE}Reboot${RESET}"
+    echo -e "${WHITE}[0] ${PURPLE}Exit${RESET}"
+}
+
+# Function to display the edit configs menu
+display_edit_configs_menu() {
+    echo -e "${PURPLE}=== Edit Configs ===${RESET}"
+    for i in "${!CONFIG_FILES[@]}"; do
+        echo -e "${WHITE}[$((i + 1))] ${PURPLE}${CONFIG_FILES[i]}${RESET}"
+    done
+    echo -e "${WHITE}[0] ${PURPLE}Back${RESET}"
+}
+
+# Function to open the selected config file
+edit_file() {
+    local file=${CONFIG_FILES[$1]}
+    if [ -f "$file" ]; then
+        vim "$file" # Open the file with vim
+    else
+        echo -e "${WHITE}File does not exist: ${PURPLE}$file${RESET}"
+    fi
+}
+
+# Function to get wallpaper options from the Pictures directory
+get_wallpaper_options() {
+    local wallpaper_dir=~/Pictures
+    mapfile -t WALLPAPERS < <(find "$wallpaper_dir" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \))
+    # Include the specific wallpaper
+    WALLPAPERS+=("$HOME/Pictures/threekonosuba.png")
+}
+
+# Function to display wallpaper options
+display_wallpaper_options() {
+    echo -e "${PURPLE}=== Select Wallpaper ===${RESET}"
+    for i in "${!WALLPAPERS[@]}"; do
+        echo -e "${WHITE}[$((i + 1))] ${PURPLE}${WALLPAPERS[i]}${RESET}"
+    done
+    echo -e "${WHITE}[0] ${PURPLE}Back${RESET}"
+}
+
+# Function to change the wallpaper
+change_wallpaper() {
+    get_wallpaper_options
+    while true; do
+        display_wallpaper_options
+        read -p "Select a wallpaper: " wallpaper_choice
+
+        case "$wallpaper_choice" in
+            [1-9]*)  # Adjust range as needed based on the number of wallpapers
+                wallpaper_path=${WALLPAPERS[$((wallpaper_choice - 1))]}
+                hyprctl hyprpaper wallpaper HDMI-A-1,"$wallpaper_path"
+                echo -e "${WHITE}Wallpaper changed to: ${PURPLE}$wallpaper_path${RESET}"
+                break
+                ;;
+            0)
+                break
+                ;;
+            *)
+                echo -e "${WHITE}Invalid option. Please try again.${RESET}"
+                ;;
+        esac
+    done
+}
+
+# Function to reboot the system
+reboot_system() {
+    echo -e "${WHITE}Rebooting...${RESET}"
+    sudo reboot
+}
+
+# Main loop
+while true; do
+    display_menu
+    read -p "Select an option: " choice
+
+    case "$choice" in
+        1)
+            # Loop for editing configs
+            while true; do
+                display_edit_configs_menu
+                read -p "Select a config to edit: " config_choice
+
+                case "$config_choice" in
+                    [1-7])
+                        edit_file $((config_choice - 1))
+                        ;;
+                    0)
+                        break
+                        ;;
+                    *)
+                        echo -e "${WHITE}Invalid option. Please try again.${RESET}"
+                        ;;
+                esac
+            done
+            ;;
+        2)
+            change_wallpaper
+            ;;
+        3)
+            reboot_system
+            ;;
+        0)
+            echo -e "${PURPLE}Exiting...${RESET}"
+            exit 0
+            ;;
+        *)
+            echo -e "${WHITE}Invalid option. Please try again.${RESET}"
+            ;;
+    esac
+done
+
