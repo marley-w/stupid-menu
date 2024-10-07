@@ -6,15 +6,12 @@ chat-gpt says on arch you need
 
 base-devel
 fastfetch
-feh
+vim 
+kitty
 
 Installation. 
 
-download c.c 
-(if you want the photo gallery to work you need to edit c.c with a text editor, 'changing marley to yourusername' BEFORE compiling otherwise the directory wont be set properly)
+download then do 
 
-then do 
-
-gcc -o menu c.c
-
+chmod 777 /menu
 ./menu
