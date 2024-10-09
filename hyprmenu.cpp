@@ -48,14 +48,64 @@ void edit_config(const char *config_file) {
     }
 }
 
-// Function to reboot the system
-void reboot_system() {
-    std::system("reboot");
+// Function to run system update using pacman
+void system_update() {
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child process: run the system update
+        execlp("kitty", "kitty", "-e", "sudo", "pacman", "-Syu", (char *)NULL);
+        _exit(EXIT_FAILURE);
+    }
 }
 
-// Function to shut down the system
-void shutdown_system() {
-    std::system("shutdown now");
+// Function to launch nwg-look for GTK appearance settings
+void launch_gtk_appearance() {
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child process: launch nwg-look
+        execlp("nwg-look", "nwg-look", (char *)NULL);
+        _exit(EXIT_FAILURE);
+    }
+}
+
+// Function to launch qt6ct for QT appearance settings
+void launch_qt_appearance() {
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child process: launch qt6ct
+        execlp("qt6ct", "qt6ct", (char *)NULL);
+        _exit(EXIT_FAILURE);
+    }
+}
+
+// Callback for launching pavucontrol (volume control)
+void launch_volume() {
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child process: launch pavucontrol
+        execlp("pavucontrol", "pavucontrol", (char *)NULL);
+        _exit(EXIT_FAILURE);
+    }
+}
+
+// Callback for launching gnome-disks (disk management)
+void launch_disk_management() {
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child process: launch gnome-disks
+        execlp("gnome-disks", "gnome-disks", (char *)NULL);
+        _exit(EXIT_FAILURE);
+    }
+}
+
+// Callback for launching gnome-system-monitor (task manager)
+void launch_task_manager() {
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child process: launch gnome-system-monitor
+        execlp("gnome-system-monitor", "gnome-system-monitor", (char *)NULL);
+        _exit(EXIT_FAILURE);
+    }
 }
 
 // Callback for the buttons to launch apps, edit files, etc.
@@ -70,7 +120,36 @@ void on_edit_config_clicked(GtkWidget *widget, gpointer data) {
     edit_config(config_file);
 }
 
-// Main application
+// Callback for system update button
+void on_system_update_clicked(GtkWidget *widget, gpointer data) {
+    system_update();
+}
+
+// Callback for GTK appearance button
+void on_gtk_appearance_clicked(GtkWidget *widget, gpointer data) {
+    launch_gtk_appearance();
+}
+
+// Callback for QT appearance button
+void on_qt_appearance_clicked(GtkWidget *widget, gpointer data) {
+    launch_qt_appearance();
+}
+
+// Callback for volume button
+void on_volume_clicked(GtkWidget *widget, gpointer data) {
+    launch_volume();
+}
+
+// Callback for disk management button
+void on_disk_management_clicked(GtkWidget *widget, gpointer data) {
+    launch_disk_management();
+}
+
+// Callback for task manager button
+void on_task_manager_clicked(GtkWidget *widget, gpointer data) {
+    launch_task_manager();
+}
+
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
 
@@ -86,20 +165,27 @@ int main(int argc, char *argv[]) {
 
     // ==== Applications Tab ====
     GtkWidget *applications_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    GtkWidget *steam_button = gtk_button_new_with_label("Launch Steam");
-    GtkWidget *firefox_button = gtk_button_new_with_label("Launch Firefox");
-    GtkWidget *kitty_button = gtk_button_new_with_label("Launch Kitty");
-
+    GtkWidget *steam_button = gtk_button_new_with_label("Steam");
+    GtkWidget *firefox_button = gtk_button_new_with_label("Firefox");
+    GtkWidget *obs_button = gtk_button_new_with_label("OBS");
+    GtkWidget *nautilus_button = gtk_button_new_with_label("Files");
+    GtkWidget *kitty_button = gtk_button_new_with_label("Kitty");
+        
     // Connect buttons to commands (non-blocking)
     g_signal_connect(steam_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "steam");
     g_signal_connect(firefox_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "firefox");
+    g_signal_connect(obs_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "obs-studio");
+    g_signal_connect(nautilus_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "nautilus");
     g_signal_connect(kitty_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "kitty");
+    
 
     // Add buttons to the Applications tab
     gtk_box_pack_start(GTK_BOX(applications_box), steam_button, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(applications_box), firefox_button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(applications_box), obs_button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(applications_box), nautilus_button, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(applications_box), kitty_button, TRUE, TRUE, 0);
-
+     
     // Add Applications tab to the notebook
     GtkWidget *applications_label = gtk_label_new("Applications");
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), applications_box, applications_label);
@@ -107,63 +193,73 @@ int main(int argc, char *argv[]) {
     // ==== Edit Configs Tab ====
     GtkWidget *configs_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
-    GtkWidget *hyprland_button = gtk_button_new_with_label("Edit hyprland.conf");
-    GtkWidget *hyprpaper_button = gtk_button_new_with_label("Edit hyprpaper.conf");
-    GtkWidget *kitty_button_config = gtk_button_new_with_label("Edit kitty.conf");
-    GtkWidget *waybar_style_button = gtk_button_new_with_label("Edit waybar style.css");
-    GtkWidget *waybar_config_button = gtk_button_new_with_label("Edit waybar config");
+    GtkWidget *hyprland_button = gtk_button_new_with_label("Hyprland");
+    GtkWidget *hyprpaper_button = gtk_button_new_with_label("Hyprpaper");
+    GtkWidget *waybar_config_button = gtk_button_new_with_label("WayConfig");
+    GtkWidget *waybar_style_button = gtk_button_new_with_label("WayStyle");
+    GtkWidget *kitty_button_config = gtk_button_new_with_label("Kitty");
+
 
     // Connect buttons to edit config files with vim
     g_signal_connect(hyprland_button, "clicked", G_CALLBACK(on_edit_config_clicked), (gpointer) ".config/hypr/hyprland.conf");
     g_signal_connect(hyprpaper_button, "clicked", G_CALLBACK(on_edit_config_clicked), (gpointer) ".config/hypr/hyprpaper.conf");
-    g_signal_connect(kitty_button_config, "clicked", G_CALLBACK(on_edit_config_clicked), (gpointer) ".config/kitty/kitty.conf");
-    g_signal_connect(waybar_style_button, "clicked", G_CALLBACK(on_edit_config_clicked), (gpointer) ".config/waybar/style.css");
     g_signal_connect(waybar_config_button, "clicked", G_CALLBACK(on_edit_config_clicked), (gpointer) ".config/waybar/config");
-
+    g_signal_connect(waybar_style_button, "clicked", G_CALLBACK(on_edit_config_clicked), (gpointer) ".config/waybar/style.css");
+    g_signal_connect(kitty_button_config, "clicked", G_CALLBACK(on_edit_config_clicked), (gpointer) ".config/kitty/kitty.conf");
+   
+   
     // Add config buttons to the Edit Configs tab
     gtk_box_pack_start(GTK_BOX(configs_box), hyprland_button, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(configs_box), hyprpaper_button, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(configs_box), kitty_button_config, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(configs_box), waybar_style_button, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(configs_box), waybar_config_button, TRUE, TRUE, 0);
-
+    gtk_box_pack_start(GTK_BOX(configs_box), waybar_style_button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(configs_box), kitty_button_config, TRUE, TRUE, 0);
+    
     // Add Edit Configs tab to the notebook
     GtkWidget *configs_label = gtk_label_new("Edit Configs");
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), configs_box, configs_label);
 
     // ==== System Information Tab ====
     GtkWidget *info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    GtkWidget *system_info_label = gtk_label_new("CPU: i5-7600k @ 4.6GHz\n"
+    GtkWidget *system_info_label = gtk_label_new("CPU: i5-7600k @4.6GHz\n"
                                                  "GPU: RX580 (8GB)\n"
                                                  "OS: Arch Linux Zen");
     gtk_box_pack_start(GTK_BOX(info_box), system_info_label, TRUE, TRUE, 0);
-
-    // Load and display the logo image at original size
-    GtkWidget *logo_image = gtk_image_new_from_file("~/Pictures/logogirl.png");
-    if (logo_image != NULL) {
-        gtk_box_pack_start(GTK_BOX(info_box), logo_image, TRUE, TRUE, 0);
-    }
 
     // Add System Information tab to the notebook
     GtkWidget *info_label = gtk_label_new("System Information");
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), info_box, info_label);
 
-    // ==== Bye Tab ====
-    GtkWidget *bye_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    GtkWidget *reboot_button = gtk_button_new_with_label("Reboot");
-    GtkWidget *shutdown_button = gtk_button_new_with_label("Shutdown");
+    // ==== System Management Tab ====
+    GtkWidget *system_management_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    GtkWidget *volume_button = gtk_button_new_with_label("Volume");
+    GtkWidget *disk_management_button = gtk_button_new_with_label("Disk Management");
+    GtkWidget *task_manager_button = gtk_button_new_with_label("Task Manager");
+    GtkWidget *gtk_appearance_button = gtk_button_new_with_label("GTK Appearance");
+    GtkWidget *qt_appearance_button = gtk_button_new_with_label("QT Appearance");
+    GtkWidget *update_button = gtk_button_new_with_label("Update System");
 
-    // Connect buttons to system commands
-    g_signal_connect(reboot_button, "clicked", G_CALLBACK(reboot_system), NULL);
-    g_signal_connect(shutdown_button, "clicked", G_CALLBACK(shutdown_system), NULL);
+    // Connect buttons to system management commands
+    g_signal_connect(volume_button, "clicked", G_CALLBACK(on_volume_clicked), NULL);
+    g_signal_connect(disk_management_button, "clicked", G_CALLBACK(on_disk_management_clicked), NULL);
+    g_signal_connect(task_manager_button, "clicked", G_CALLBACK(on_task_manager_clicked), NULL);
+    g_signal_connect(gtk_appearance_button, "clicked", G_CALLBACK(on_gtk_appearance_clicked), NULL);
+    g_signal_connect(qt_appearance_button, "clicked", G_CALLBACK(on_qt_appearance_clicked), NULL);
+    g_signal_connect(update_button, "clicked", G_CALLBACK(on_system_update_clicked), NULL);
 
-    // Add buttons to the Bye tab
-    gtk_box_pack_start(GTK_BOX(bye_box), reboot_button, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(bye_box), shutdown_button, TRUE, TRUE, 0);
 
-    // Add Bye tab to the notebook
-    GtkWidget *bye_label = gtk_label_new("Bye");
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), bye_box, bye_label);
+    // Add buttons to System Management tab
+    gtk_box_pack_start(GTK_BOX(system_management_box), volume_button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(system_management_box), disk_management_button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(system_management_box), task_manager_button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(system_management_box), gtk_appearance_button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(system_management_box), qt_appearance_button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(system_management_box), update_button, TRUE, TRUE, 0);
+
+
+    // Add System Management tab to the notebook
+    GtkWidget *system_management_label = gtk_label_new("System Management");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), system_management_box, system_management_label);
 
     // Show everything
     gtk_widget_show_all(window);
