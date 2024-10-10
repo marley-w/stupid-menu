@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
     // Connect buttons to commands (non-blocking)
     g_signal_connect(steam_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "steam");
     g_signal_connect(firefox_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "firefox");
-    g_signal_connect(obs_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "obs-studio");
+    g_signal_connect(obs_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "obs");
     g_signal_connect(nautilus_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "nautilus");
     g_signal_connect(kitty_button, "clicked", G_CALLBACK(on_button_clicked), (gpointer) "kitty");
     
